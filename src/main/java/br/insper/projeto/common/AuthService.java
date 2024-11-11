@@ -34,7 +34,7 @@ public class AuthService {
         ResponseEntity<Map> response = restTemplate.exchange(loginUrl, HttpMethod.POST, request, Map.class);
 
         if (response.getStatusCode().is2xxSuccessful()) {
-            this.token = response.getBody().get("token").toString();
+            this.token = response.getBody().get("token").toString();  // Obtém o token diretamente, sem prefixo
         } else {
             throw new RuntimeException("Login failed: " + response.getStatusCode());
         }
@@ -47,7 +47,7 @@ public class AuthService {
         RestTemplate restTemplate = new RestTemplate();
 
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Bearer " + token);
+        headers.set("Authorization", token);  // Passa o token diretamente, sem prefixo "Bearer"
 
         HttpEntity<String> request = new HttpEntity<>(headers);
         ResponseEntity<Map> response = restTemplate.exchange(validateUrl, HttpMethod.GET, request, Map.class);
@@ -59,10 +59,10 @@ public class AuthService {
         return this.token;
     }
 
-    private PlanoUsuarioDTO achaUsuario(String jwtToken) {
+    public PlanoUsuarioDTO achaUsuario(String jwtToken) {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", jwtToken);
+        headers.set("Authorization", jwtToken);  // Passa o token diretamente, sem prefixo "Bearer"
 
         HttpEntity<String> entity = new HttpEntity<>(headers);
         String url = "http://184.72.80.215/usuario/validate";
@@ -76,10 +76,8 @@ public class AuthService {
             );
 
             if (response.getStatusCode().is2xxSuccessful()) {
-                PlanoUsuarioDTO planoUsuario = response.getBody();
-                return planoUsuario;
-            }
-            else {
+                return response.getBody();
+            } else {
                 throw new RuntimeException("Usuário não encontrado. Status code: " + response.getStatusCode());
             }
         } catch (HttpClientErrorException e) {

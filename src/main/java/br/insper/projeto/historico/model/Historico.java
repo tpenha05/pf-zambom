@@ -1,28 +1,67 @@
 package br.insper.projeto.historico.model;
 
-import lombok.Getter;
-import lombok.Setter;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.MongoId;
-
-import java.time.LocalDateTime;
 
 @Document(collection = "historico")
-@Getter
-@Setter
-public class  Historico {
-    @MongoId
+public class Historico {
+
+    @Id
     private String id;
 
     private String email;
+    private String comprador;
+    private String marca;
+    private String modelo;
+    private Integer ano;
 
-    private String filmeId;
+    // Getters e Setters
 
-    private LocalDateTime dataHistorico;
+    public String getId() {
+        return id;
+    }
 
-    private Integer tempoAssistido;
+    public void setId(String id) {
+        this.id = id;
+    }
 
-    private String genero;
+    public String getEmail() {
+        return email;
+    }
 
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
+    public String getComprador() {
+        return comprador;
+    }
+
+    public void setComprador(String comprador) {
+        this.comprador = comprador;
+    }
+
+    public String getMarca() {
+        return marca;
+    }
+
+    public void setMarca(String marca) {
+        this.marca = marca;
+    }
+
+    public String getModelo() {
+        return modelo;
+    }
+
+    public void setModelo(String modelo) {
+        this.modelo = modelo;
+    }
+
+    public Integer getAno() {
+        return ano;
+    }
+
+    public void setAno(Integer ano) {
+        this.ano = ano;
+    }
 }

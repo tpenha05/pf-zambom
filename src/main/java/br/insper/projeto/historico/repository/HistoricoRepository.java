@@ -7,8 +7,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface HistoricoRepository extends MongoRepository<Historico, Integer> {
+public interface HistoricoRepository extends MongoRepository<Historico, Long> {
     List<Historico> findByEmail(String email);
-
-    List<Historico> findAllByEmail(String emailFromToken);
 }
