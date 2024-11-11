@@ -3,7 +3,7 @@ package br.insper.projeto.historico.dto;
 public class PlanoUsuarioDTO {
 
     private String email;
-    private String nome;
+    private String papel;
 
     // Getters e Setters
 
@@ -15,11 +15,11 @@ public class PlanoUsuarioDTO {
         this.email = email;
     }
 
-    public String getNome() {
-        return nome;
+    public String getPapel() {
+        return papel;
     }
 
-    public void setNome(String nome) {
-        this.nome = nome;
+    public void setPapel(String papel) {
+        this.papel = papel;
     }
 }

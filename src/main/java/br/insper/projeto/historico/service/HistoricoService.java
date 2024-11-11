@@ -1,22 +1,22 @@
 package br.insper.projeto.historico.service;
 
-import br.insper.projeto.historico.dto.CompraDTO;
 import br.insper.projeto.historico.dto.PlanoUsuarioDTO;
-
-import br.insper.projeto.historico.model.Historico;
+import br.insper.projeto.historico.model.Feedback;
 import br.insper.projeto.historico.repository.HistoricoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class HistoricoService {
@@ -41,10 +41,8 @@ public class HistoricoService {
             );
 
             if (response.getStatusCode().is2xxSuccessful()) {
-                PlanoUsuarioDTO planoUsuario = response.getBody();
-                return planoUsuario;
-            }
-            else {
+                return response.getBody();
+            } else {
                 throw new RuntimeException("Usuário não encontrado. Status code: " + response.getStatusCode());
             }
         } catch (HttpClientErrorException e) {
@@ -56,61 +54,44 @@ public class HistoricoService {
         }
     }
 
+    public Feedback enviarFeedback(String token, Feedback feedback) {
+        PlanoUsuarioDTO usuario = achaUsuario(token);
 
-
-    public List<Historico> listarHistorico(String jwtToken, Integer ano, String marca, String modelo) {
-
-        // Obtendo o email a partir do token JWT
-        String email = achaUsuario(jwtToken) != null ? achaUsuario(jwtToken).getEmail() : null;
-
-        if (email == null) {
-            throw new IllegalArgumentException("Token JWT inválido ou usuário não encontrado.");
+        if (!"ADMIN".equals(usuario.getPapel())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Acesso negado");
         }
-
-        // Buscando histórico pelo email
-        List<Historico> historico = historicoRepository.findByEmail(email);
-
-        // Verifica se o histórico não é nulo para evitar NullPointerException
-        if (historico == null) {
-            return Collections.emptyList(); // Retorna uma lista vazia se nenhum histórico for encontrado
-        }
-
-        // Filtrando pelo ano, se fornecido
-        if (ano != null) {
-            historico.removeIf(h -> !h.getAno().equals(ano));
-        }
-
-        // Filtrando pelo modelo, se fornecido (corrigido para usar getModelo)
-        if (modelo != null) {
-            historico.removeIf(h -> !h.getModelo().equals(modelo));
-        }
-
-        // Filtrando pela marca, se fornecido
-        if (marca != null) {
-            historico.removeIf(h -> !h.getMarca().equals(marca));
-        }
-
-        return historico;
+        String email = usuario.getEmail();
+        feedback.setEmail(email);
+        return historicoRepository.save(feedback);
     }
 
+    public List<Feedback> listarFeedbacks(String token) {
+        PlanoUsuarioDTO usuario = achaUsuario(token);
 
-    public Historico adicionarCompra(String jwtToken, CompraDTO compraDTO) {
+        if (!"ADMIN".equals(usuario.getPapel()) && !"DEVELOPER".equals(usuario.getPapel())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Acesso negado");
+        }
 
-
-        Historico compra = new Historico();
-
-        compra.setEmail(achaUsuario(jwtToken).getEmail());
-        compra.setAno(compraDTO.getAno());
-        compra.setMarca(compraDTO.getMarca());
-        compra.setComprador(achaUsuario(jwtToken).getNome());
-        compra.setModelo(compraDTO.getModelo());
-
-        historicoRepository.save(compra);
-        return compra;
+        return historicoRepository.findAll();
     }
 
+    public Optional<Feedback> consultarFeedbackPorId(String token, String id) {
+        PlanoUsuarioDTO usuario = achaUsuario(token);
 
+        if (!"ADMIN".equals(usuario.getPapel()) && !"DEVELOPER".equals(usuario.getPapel())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Acesso negado");
+        }
 
+        return historicoRepository.findById(id);
+    }
 
+    public void excluirFeedback(String token, String id) {
+        PlanoUsuarioDTO usuario = achaUsuario(token);
 
+        if (!"ADMIN".equals(usuario.getPapel())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Acesso negado");
+        }
+
+        historicoRepository.deleteById(id);
+    }
 }
