@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Document(collection = "historico")
 @Getter
 @Setter
-public class Historico {
+public class  Historico {
     @MongoId
     private String id;
 
